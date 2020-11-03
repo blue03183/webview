@@ -1,21 +1,42 @@
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, SafeAreaView } from 'react-native';
+import { WebView } from 'react-native-webview';
+import { Notifications } from 'expo';
+import * as Permissions from 'expo-permissions';
+import axios from 'axios';
 
 export default function App() {
+
+  const [noti, setNoti] = useState(null);
+
+  // 휴대폰 토큰 등록
+  const registToken = async () => {
+    const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+
+    if (status == 'granted') {
+      const token = await Notifications.getExpoPushTokenAsync();
+
+      await axios.post('http://localhost:3000/users/token', { token });
+    }
+  }
+
+  useEffect(() => {
+    registToken();
+  }, []);
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
+    <SafeAreaView style={styles.container}>
       <StatusBar style="auto" />
-    </View>
+      <WebView 
+        source={{ uri: 'http://www.samil.hs.kr/main.php' }}
+      />
+    </SafeAreaView>    
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flex: 1
   },
 });
